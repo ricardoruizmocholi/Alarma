@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reloj Galáctico</title>
+  <style>
+    /* ======== ESTILO GENERAL ======== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      background: radial-gradient(circle at center, #00111f, #000);
+      color: #00fff7;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: "Orbitron", sans-serif;
+      overflow: hidden;
+    }
+
+    /* ======== EFECTO NEÓN ======== */
+    .neon {
+      text-shadow:
+        0 0 5px #00fff7,
+        0 0 10px #00fff7,
+        0 0 20px #00fff7,
+        0 0 40px #00fff7;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        text-shadow:
+          0 0 5px #00fff7,
+          0 0 10px #00fff7,
+          0 0 20px #00fff7,
+          0 0 40px #00fff7;
+      }
+      50% {
+        text-shadow:
+          0 0 10px #00ccff,
+          0 0 25px #00ccff,
+          0 0 45px #00ccff,
+          0 0 60px #00ccff;
+      }
+    }
+
+    /* ======== RELOJ ======== */
+    h1 {
+      font-size: 6em;
+      letter-spacing: 5px;
+    }
+
+    /* ======== BOTÓN ======== */
+    button {
+      margin-top: 40px;
+      padding: 15px 40px;
+      border: 2px solid #00fff7;
+      border-radius: 12px;
+      background: transparent;
+      color: #00fff7;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: 0.3s;
+      text-transform: uppercase;
+    }
+
+    button:hover {
+      background: #00fff7;
+      color: #000;
+      box-shadow: 0 0 20px #00fff7;
+      transform: scale(1.1);
+    }
+
+    /* ======== AURA GIRATORIA DE FONDO ======== */
+    .aura {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, transparent 0deg, #00fff7 90deg, transparent 360deg);
+      filter: blur(50px);
+      animation: rotate 10s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ======== TEXTO EXTRA ======== */
+    p {
+      margin-top: 10px;
+      font-size: 1.1em;
+      opacity: 0.8;
+    }
+
+    /* ======== FUENTE ======== */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+  </style>
+</head>
+<body>
+  <div class="aura"></div>
+  <h1 id="hora" class="neon">00:00:00</h1>
+  <button id="activar">🔊 Activar voz galáctica</button>
+  <p>El sistema te avisará cada 15 minutos con la hora exacta.</p>
+
+  <script>
+    const mostrarHora = document.getElementById("hora");
+    const boton = document.getElementById("activar");
+    let avisosActivos = false;
+
+    //  Función para obtener y mostrar la hora actual
+    function obtenerHora() {
+      const ahora = new Date();
+      const h = ahora.getHours().toString().padStart(2, '0');
+      const m = ahora.getMinutes().toString().padStart(2, '0');
+      const s = ahora.getSeconds().toString().padStart(2, '0');
+      mostrarHora.textContent = `${h}:${m}:${s}`;
+      return { h, m, s };
+    }
+
+    //  Voz sintetizada personalizada
+    function hablar(texto) {
+      const mensaje = new SpeechSynthesisUtterance(texto);
+      mensaje.lang = "es-ES";
+      mensaje.rate = 1;
+      mensaje.pitch = 1.2;
+      mensaje.volume = 1;
+      speechSynthesis.speak(mensaje);
+    }
+
+    //  Función principal: revisa hora cada segundo
+    function revisarHora() {
+      const { h, m, s } = obtenerHora();
+      if (avisosActivos && s === "00") {
+        const minutos = parseInt(m);
+        if (minutos % 15 === 0) {
+          const texto = `Son las ${h} y ${m} minutos.`;
+          hablar(texto);
+          parpadeo();
+        }
+      }
+    }
+
+    //  Efecto visual cuando anuncia la hora
+    function parpadeo() {
+      mostrarHora.style.color = "#fff";
+      mostrarHora.style.textShadow = "0 0 30px #fff, 0 0 60px #00fff7";
+      setTimeout(() => {
+        mostrarHora.style.color = "#00fff7";
+        mostrarHora.style.textShadow = "";
+      }, 2000);
+    }
+
+    //  Activar o desactivar avisos
+    boton.addEventListener("click", () => {
+      avisosActivos = !avisosActivos;
+      if (avisosActivos) {
+        hablar("Voz galáctica activada. Te notificaré cada quince minutos.");
+        boton.textContent = " Voz activada";
+        boton.style.borderColor = "#4CAF50";
+        boton.style.color = "#4CAF50";
+      } else {
+        hablar("Sistema de voz desactivado.");
+        boton.textContent = "🔊 Activar voz galáctica";
+        boton.style.borderColor = "#00fff7";
+        boton.style.color = "#00fff7";
+      }
+    });
+
+    //  Actualización continua
+    setInterval(revisarHora, 1000);
+  </script>
+</body>
+</html>
